@@ -22,6 +22,6 @@ jobs:
           password: ${{ secrets.EMAIL_PASS }}
           subject: "Code Pushed"
           to: "nawtest12@gmail.com"
-          from: "T.Naw@wlv.ac.uk"
+          from: NawNaw <ting28418@gmail.com>
           body: "Hi, I just pushed my code to the repository. Please review."
           secure: true
