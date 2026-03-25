@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import AdminDashboard from './pages/admin/Dashboard'
 import AdminLayout from './components/admin/AdminLayout'
+import AdminCategories from './pages/admin/Categories'
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth()
@@ -38,6 +39,7 @@ export default function App() {
         <Route index element={<Navigate to="/admin/dashboard" replace />} />
 
         <Route path="dashboard" element={<AdminDashboard />} />
+         <Route path="categories" element={<AdminCategories />} />
       </Route>
 
       {/* Catch-all fallback */}
