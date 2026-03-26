@@ -28,7 +28,7 @@ class AuthController extends Controller
             'password' => Hash::make($validated['password']),
             'phone' => $validated['phone'] ?? null,
             'address' => $validated['address'] ?? null,
-            'role' => 'user', // optional
+            'role' => 'user', 
         ]);
 
         // Create Passport access token

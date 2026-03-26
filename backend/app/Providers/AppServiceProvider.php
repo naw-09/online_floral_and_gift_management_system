@@ -7,28 +7,31 @@ use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Laravel\Passport\Passport; 
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         $this->configureDefaults();
+        
+        $this->configurePassport();
     }
 
-    /**
-     * Configure default behaviors for production-ready applications.
-     */
+    protected function configurePassport(): void
+    {
+        Passport::tokensExpireIn(now()->addYear());
+
+        Passport::refreshTokensExpireIn(now()->addYear());
+
+        Passport::personalAccessTokensExpireIn(now()->addYear());
+    }
+
     protected function configureDefaults(): void
     {
         Date::use(CarbonImmutable::class);
