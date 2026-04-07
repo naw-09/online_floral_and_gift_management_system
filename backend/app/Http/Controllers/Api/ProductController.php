@@ -13,7 +13,7 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        // We eager load 'category' to get the category name and image if needed
+        
         $query = Product::with('category')->where('is_active', true);
 
         // Filter by Category

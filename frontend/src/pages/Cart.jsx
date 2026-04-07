@@ -67,7 +67,7 @@ export default function Cart() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-medium text-sage-900">{item.product?.name}</p>
-              <p className="text-sage-600 text-sm">${Number(item.product?.price || 0).toFixed(2)} each</p>
+              <p className="text-sage-600 text-sm">${Number(item.product?.price || 0).toFixed(2)}</p>
               <div className="mt-2 flex items-center gap-2">
                 <input
                   type="number"

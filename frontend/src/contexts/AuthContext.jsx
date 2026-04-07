@@ -15,22 +15,37 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
+  // 1. Register Function
+  const register = async (form) => {
+    try {
+      const response = await API.post('/register', form);
+
+      const { user, token } = response.data;
+
+      // Save user and token
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+
+      setUser(user);
+
+      return { user };
+    } catch (error) {
+      throw error;
+    }
+  };
+
   // 2. Login Function
   const login = async (email, password) => {
     try {
-      // This calls your Laravel AuthController login method
       const response = await API.post('/login', { email, password });
-      
       const { user, token } = response.data;
 
-      // Save to localStorage so interceptor can find the token
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
-      
+
       setUser(user);
       return { user };
     } catch (error) {
-      // This sends the error back to your Login.jsx to show the message
       throw error;
     }
   };
@@ -44,6 +59,7 @@ export function AuthProvider({ children }) {
 
   const value = {
     user,
+    register, 
     login,
     logout,
     isAdmin: user?.role === 'admin'

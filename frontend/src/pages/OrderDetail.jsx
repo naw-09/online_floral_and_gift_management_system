@@ -15,13 +15,13 @@ export default function OrderDetail() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="flex justify-between items-start mb-6">
-        <h1 className="font-display text-2xl font-semibold text-sage-900">Order #{order.id}</h1>
+        <h1 className="font-display text-2xl font-semibold text-sage-900">#{order.id} Order</h1>
         <span className={`px-3 py-1 rounded-full text-sm font-medium ${
           order.status === 'delivered' ? 'bg-sage-100 text-sage-700' :
           order.status === 'prepared' ? 'bg-floral-100 text-floral-700' : 'bg-sage-200 text-sage-800'
         }`}>{order.status}</span>
       </div>
-      <p className="text-sage-600">Placed on {new Date(order.created_at).toLocaleString()}</p>
+      <p className="text-sage-600">Placed on: {new Date(order.created_at).toLocaleString()}</p>
       {order.delivery_date && <p className="text-sage-600">Delivery: {new Date(order.delivery_date).toLocaleDateString()}</p>}
       {order.gift_message && <p className="mt-2 p-3 bg-floral-50 rounded-lg text-sage-700">Gift message: {order.gift_message}</p>}
       <p className="mt-2 font-medium">Delivery: {order.delivery_address}</p>

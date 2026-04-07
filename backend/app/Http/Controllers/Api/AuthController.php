@@ -29,6 +29,7 @@ class AuthController extends Controller
             'phone' => $validated['phone'] ?? null,
             'address' => $validated['address'] ?? null,
             'role' => 'user', 
+            'is_active' => true,
         ]);
 
         // Create Passport access token

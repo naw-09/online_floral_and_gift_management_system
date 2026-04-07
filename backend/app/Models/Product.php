@@ -43,18 +43,18 @@ class Product extends Model
         return $this->hasMany(OrderItem::class);
     }
 
- protected function image(): Attribute
-{
-    return Attribute::make(
-        get: function ($value) {
-            if (!$value) return null;
+    protected function image(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                if (!$value) return null;
 
-            if (filter_var($value, FILTER_VALIDATE_URL)) {
-                return $value;
+                if (filter_var($value, FILTER_VALIDATE_URL)) {
+                    return $value;
+                }
+
+                return asset('storage/' . $value);
             }
-
-            return asset('storage/' . $value);
-        }
-    );
-}
+        );
+    }
 }
