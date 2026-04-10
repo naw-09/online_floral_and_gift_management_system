@@ -244,7 +244,7 @@ export default function AdminCategories() {
     image: null
   })
 
-  // ✅ NEW: preview state
+  // preview state
   const [preview, setPreview] = useState(null)
 
   const load = () =>
@@ -256,7 +256,7 @@ export default function AdminCategories() {
     load()
   }, [])
 
-  // ✅ OPEN ADD
+ 
   const openAdd = () => {
     setEditing(null)
     setForm({ name: '', description: '', image: null })
