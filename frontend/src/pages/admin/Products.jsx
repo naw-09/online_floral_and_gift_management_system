@@ -52,7 +52,7 @@ export default function AdminProducts() {
   };
 
 const handleFileChange = (e) => {
- const file = e.target.files; 
+const file = e.target.files[0];
   if (file) {
     setForm({ ...form, image: file }); 
     setImagePreview(URL.createObjectURL(file)); 
@@ -125,6 +125,7 @@ const handleSubmit = async (e) => {
               <th className="px-6 py-3 text-left font-semibold text-sage-700">Name</th>
               <th className="px-6 py-3 text-left font-semibold text-sage-700">Category</th>
               <th className="px-6 py-3 text-left font-semibold text-sage-700">Price</th>
+              <th className="px-6 py-3 text-left font-semibold text-sage-700">Stock</th>
               <th className="px-6 py-3 text-right font-semibold text-sage-700">Actions</th>
             </tr>
           </thead>
@@ -151,7 +152,15 @@ const handleSubmit = async (e) => {
                     ) : (
                         <span className="text-sage-900">${Number(p.price).toFixed(2)}</span>
                     )}
+                    
                 </td>
+                <td className="px-6 py-4">
+    <div className={`font-medium ${p.stock <= 0 ? 'text-red-600' : 'text-sage-900'}`}>
+        {p.stock} 
+    </div>
+    {p.stock <= 0 && <span className="text-[10px] text-red-500 font-bold uppercase">Out of Stock</span>}
+</td>
+                
                 <td className="px-6 py-4 text-right space-x-3">
                   <button onClick={() => openModal(p)} className="text-sage-600 hover:text-sage-900">Edit</button>
                   <button onClick={() => deleteProduct(p.id)} className="text-red-500 hover:text-red-700">Delete</button>

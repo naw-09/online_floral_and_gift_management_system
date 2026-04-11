@@ -6,10 +6,7 @@ import {
   Clock, 
   CheckCircle, 
   XCircle, 
-  Users, 
-  DollarSign,
   TrendingUp,
-  ArrowRight
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -39,9 +36,8 @@ export default function AdminDashboard() {
     );
   }
 
-  const { stats, recent_orders, chart_data } = data;
+  const { stats, recent_orders } = data;
 
-  // Configuration for the top 4 status cards
   const statusCards = [
     { label: "Today's Orders", value: stats.today_orders, icon: <ShoppingBag size={20} />, color: "blue" },
     { label: "Pending", value: stats.pending_orders, icon: <Clock size={20} />, color: "amber" },
@@ -58,12 +54,7 @@ export default function AdminDashboard() {
             <LayoutDashboard className="text-indigo-600" />
             Admin Overview
           </h1>
-          {/* <p className="text-slate-500 text-sm">Real-time statistics for your store today.</p> */}
         </div>
-        {/* <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span className="text-xs font-medium text-slate-600 uppercase tracking-wider">Live Updates</span>
-        </div> */}
       </div>
 
       {/* Main Stats Grid */}
@@ -87,18 +78,13 @@ export default function AdminDashboard() {
         
         {/* Recent Orders Table */}
         <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-          {/* <div className="px-6 py-5 border-b border-slate-50 flex justify-between items-center">
-            <h2 className="font-bold text-slate-800">Recent Orders</h2>
-            <button className="text-indigo-600 text-sm font-semibold hover:underline flex items-center gap-1">
-              View All <ArrowRight size={14} />
-            </button>
-          </div> */}
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="bg-slate-50/50 text-left text-xs font-semibold text-slate-400 uppercase tracking-widest">
                   <th className="px-6 py-4">Order ID</th>
                   <th className="px-6 py-4">Customer</th>
+                  <th className="px-6 py-4">Products & Qty</th>
                   <th className="px-6 py-4">Total</th>
                   <th className="px-6 py-4 text-center">Status</th>
                 </tr>
@@ -113,6 +99,22 @@ export default function AdminDashboard() {
                         <span className="text-xs text-slate-400">{order.user?.email}</span>
                       </div>
                     </td>
+                    
+                    {/* Products & Quantity Column */}
+                    <td className="px-6 py-4">
+                      <div className="flex flex-wrap gap-1.5">
+                        {order.items?.map((item, idx) => (
+                          <div 
+                            key={idx} 
+                            className="inline-flex items-center bg-indigo-50 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-md border border-indigo-100"
+                          >
+                            <span className="mr-1">{item.quantity}×</span>
+                            <span className="max-w-[120px] truncate">{item.product?.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </td>
+
                     <td className="px-6 py-4 text-sm font-bold text-slate-900">${order.total}</td>
                     <td className="px-6 py-4 text-center">
                       <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider
@@ -129,9 +131,8 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Sales Summary & Small Chart Area */}
+        {/* Revenue Sidebar */}
         <div className="space-y-8">
-          {/* Revenue Card */}
           <div className="bg-indigo-600 p-8 rounded-3xl shadow-xl shadow-indigo-200 text-white relative overflow-hidden">
             <TrendingUp className="absolute right-[-10px] bottom-[-10px] text-indigo-500 w-32 h-32 opacity-20" />
             <p className="text-indigo-100 text-sm font-medium mb-1">Total Sales Revenue</p>
@@ -148,33 +149,6 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
-
-          {/* Simple Visual Bar Chart (Mocked using CSS) */}
-          {/* <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-            <h3 className="text-sm font-bold text-slate-800 mb-6">Last 7 Days Performance</h3>
-            <div className="flex items-end justify-between h-32 gap-2">
-              {chart_data.map((item, idx) => {
-                // Determine height percentage relative to a max (e.g., 5000)
-                const height = Math.min((item.total_sales / 2000) * 100, 100); 
-                return (
-                  <div key={idx} className="flex flex-col items-center flex-1 group">
-                    <div 
-                      style={{ height: `${height}%` }}
-                      className="w-full bg-indigo-100 group-hover:bg-indigo-500 rounded-t-md transition-all duration-300 relative"
-                    >
-                        <span className="hidden group-hover:block absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-1 px-2 rounded tracking-tighter">
-                            ${item.total_sales}
-                        </span>
-                    </div>
-                    <span className="text-[10px] text-slate-400 mt-2 rotate-45 md:rotate-0">
-                      {new Date(item.date).toLocaleDateString('en-US', { weekday: 'short' })}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div> */}
-
         </div>
       </div>
     </div>

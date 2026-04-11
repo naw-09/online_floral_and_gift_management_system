@@ -29,8 +29,8 @@ class AdminDashboardController extends Controller
             'total_sales'      => round(Order::whereIn('status', ['prepared', 'delivered'])->sum('total'), 2),
         ];
 
-        // 2. Get recent orders with user information
-        $recentOrders = Order::with('user:id,name,email')
+     
+        $recentOrders = Order::with(['user:id,name,email', 'items.product'])
             ->latest()
             ->take(10)
             ->get();
@@ -46,10 +46,10 @@ class AdminDashboardController extends Controller
             ->get();
 
         return response()->json([
-            'success' => true,
-            'stats' => $stats,
+            'success'       => true,
+            'stats'         => $stats,
             'recent_orders' => $recentOrders,
-            'chart_data' => $chartData,
+            'chart_data'    => $chartData,
         ]);
     }
 }
