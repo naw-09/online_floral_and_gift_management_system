@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext'
 import API from '../api/axios';
 
 export default function Profile() {
-  const { user } = useAuth()
+  const { user, updateUser } = useAuth();
   const [form, setForm] = useState({ name: '', phone: '', address: '' })
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
@@ -19,7 +19,8 @@ export default function Profile() {
     setSaving(true)
     setMessage('')
     try {
-      await API.put('/user', form)
+     const response = await API.put('/user', form);
+      updateUser(response.data);
       setMessage('Profile updated.')
     } catch (err) {
       setMessage(err.response?.data?.message || 'Update failed')

@@ -8,10 +8,10 @@ export default function AdminProducts() {
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState(null);
   
-  // Added 'image' and 'imagePreview' to form state
+
   const [form, setForm] = useState({ 
-    name: '', description: '', price: '', category_id: '', 
-    type: 'floral', is_active: true, stock: 0, image: null 
+    name: '', description: '', price: '', discount_price: '', category_id: '', 
+    type: 'floral', is_active: true, is_popular: false, stock: 0, image: null 
   });
   const [imagePreview, setImagePreview] = useState(null);
 
@@ -25,28 +25,34 @@ export default function AdminProducts() {
   }, []);
 
   const openModal = (product = null) => {
-    setImagePreview(product?.image || null); // Show existing image if editing
+    setImagePreview(product?.image || null); 
     if (product) {
       setEditing(product);
       setForm({
         name: product.name,
         description: product.description || '',
         price: product.price,
+        discount_price: product.discount_price || '',
         category_id: product.category_id,
         type: product.type,
         is_active: product.is_active,
+        is_popular: product.is_popular || false,
         stock: product.stock ?? 0,
-        image: null // Keep null unless user picks a NEW file
+        image: null 
       });
     } else {
       setEditing(null);
-      setForm({ name: '', description: '', price: '', category_id: '', type: 'floral', is_active: true, stock: 0, image: null });
+      setForm({ 
+        name: '', description: '', price: '', discount_price: '', 
+        category_id: '', type: 'floral', is_active: true, 
+        is_popular: false, stock: 0, image: null 
+      });
     }
     setShowModal(true);
   };
 
 const handleFileChange = (e) => {
- const file = e.target.files[0]; 
+ const file = e.target.files; 
   if (file) {
     setForm({ ...form, image: file }); 
     setImagePreview(URL.createObjectURL(file)); 
@@ -59,19 +65,20 @@ const handleSubmit = async (e) => {
   
   data.append('name', form.name);
   data.append('price', form.price);
+  data.append('discount_price', form.discount_price || '');
   data.append('category_id', form.category_id);
   data.append('type', form.type);
   data.append('stock', form.stock);
   data.append('is_active', form.is_active ? 1 : 0);
+  data.append('is_popular', form.is_popular ? 1 : 0);
   data.append('description', form.description || '');
 
-  // Only send image if it's a NEW file object
   if (form.image instanceof File) {
     data.append('image', form.image);
   }
 
   if (editing) {
-    data.append('_method', 'PUT'); // Trick Laravel into a PUT while using POST
+    data.append('_method', 'PUT'); 
   }
 
   try {
@@ -85,7 +92,6 @@ const handleSubmit = async (e) => {
     alert(err.response?.data?.message || 'Failed');
   }
 };
-
 
   const deleteProduct = async (id) => {
     if (!confirm('Delete this product?')) return;
@@ -128,9 +134,24 @@ const handleSubmit = async (e) => {
                 <td className="px-6 py-4">
                   <img src={p.image} alt="" className="w-12 h-12 object-cover rounded-md border border-sage-200 bg-sage-50" />
                 </td>
-                <td className="px-6 py-4 text-sage-900 font-medium">{p.name}</td>
+                <td className="px-6 py-4">
+                    <div className="text-sage-900 font-medium">{p.name}</div>
+                    <div className="flex gap-1 mt-1">
+                        {p.is_popular && <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 rounded">Popular</span>}
+                        {p.discount_price && <span className="text-[10px] bg-red-100 text-red-700 px-1.5 rounded">Sale</span>}
+                    </div>
+                </td>
                 <td className="px-6 py-4 text-sage-600">{p.category?.name || 'N/A'}</td>
-                <td className="px-6 py-4 text-sage-900">${Number(p.price).toFixed(2)}</td>
+                <td className="px-6 py-4">
+                    {p.discount_price ? (
+                        <div className="flex flex-col">
+                            <span className="text-sage-900 font-bold">${Number(p.discount_price).toFixed(2)}</span>
+                            <span className="text-sage-400 line-through text-xs">${Number(p.price).toFixed(2)}</span>
+                        </div>
+                    ) : (
+                        <span className="text-sage-900">${Number(p.price).toFixed(2)}</span>
+                    )}
+                </td>
                 <td className="px-6 py-4 text-right space-x-3">
                   <button onClick={() => openModal(p)} className="text-sage-600 hover:text-sage-900">Edit</button>
                   <button onClick={() => deleteProduct(p.id)} className="text-red-500 hover:text-red-700">Delete</button>
@@ -150,7 +171,6 @@ const handleSubmit = async (e) => {
             </div>
             
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              {/* Image Upload Section */}
               <div className="flex items-center gap-4 p-3 bg-sage-50 rounded-xl border border-dashed border-sage-300">
                 <div className="w-20 h-20 bg-white rounded-lg border border-sage-200 overflow-hidden flex-shrink-0">
                   {imagePreview ? (
@@ -171,8 +191,12 @@ const handleSubmit = async (e) => {
                   <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className="w-full mt-1 px-3 py-2 border border-sage-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:outline-none text-sage-900" />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-sage-500 uppercase">Price ($)</label>
+                  <label className="text-xs font-semibold text-sage-500 uppercase">Regular Price ($)</label>
                   <input type="number" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required className="w-full mt-1 px-3 py-2 border border-sage-300 rounded-lg text-sage-900" />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-sage-500 uppercase">Discount Price ($)</label>
+                  <input type="number" step="0.01" value={form.discount_price} onChange={(e) => setForm({ ...form, discount_price: e.target.value })} className="w-full mt-1 px-3 py-2 border border-sage-300 rounded-lg text-sage-900" placeholder="Optional" />
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-sage-500 uppercase">Stock</label>
@@ -185,7 +209,7 @@ const handleSubmit = async (e) => {
                     {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                 </div>
-                <div>
+                <div className="col-span-2">
                   <label className="text-xs font-semibold text-sage-500 uppercase">Type</label>
                   <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} className="w-full mt-1 px-3 py-2 border border-sage-300 rounded-lg text-sage-900">
                     <option value="floral">Floral</option>
@@ -195,10 +219,16 @@ const handleSubmit = async (e) => {
               </div>
 
               <div className="flex items-center justify-between pt-4 border-t border-sage-100">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} className="accent-sage-600" />
-                  <span className="text-sm text-sage-700">Active</span>
-                </label>
+                <div className="flex gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} className="accent-sage-600" />
+                    <span className="text-sm text-sage-700">Active</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={form.is_popular} onChange={(e) => setForm({ ...form, is_popular: e.target.checked })} className="accent-amber-500" />
+                    <span className="text-sm text-sage-700">Popular</span>
+                    </label>
+                </div>
                 <div className="flex gap-3">
                   <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 text-sm text-sage-600 font-medium">Cancel</button>
                   <button type="submit" className="px-6 py-2 bg-sage-600 text-white rounded-lg text-sm font-semibold hover:bg-sage-700 transition-colors shadow-md shadow-sage-200">

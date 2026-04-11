@@ -67,4 +67,30 @@ class ProductController extends Controller
 
         return response()->json($product);
     }
+
+    /**
+ * Get popular products
+ */
+public function popular()
+{
+    return Product::with('category')
+        ->where('is_active', true)
+        ->where('is_popular', true)
+        ->latest()
+        ->take(6)
+        ->get();
+}
+
+/**
+ * Get discounted products
+ */
+public function discounted()
+{
+    return Product::with('category')
+        ->where('is_active', true)
+        ->where('discount_price', '>', 0) 
+        ->latest()
+        ->take(6)
+        ->get();
+}
 }

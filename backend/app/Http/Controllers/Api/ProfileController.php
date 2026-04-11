@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 
+class ProfileController extends Controller
+{
 public function update(Request $request)
 {
     $user = $request->user();
@@ -18,12 +20,9 @@ public function update(Request $request)
     ]);
 
     if ($request->hasFile('avatar')) {
-        // Optional: Delete the old image if it exists
         if ($user->avatar_path) {
             Storage::disk('public')->delete($user->avatar_path);
         }
-
-        // Store the new image in 'storage/app/public/avatars'
         $path = $request->file('avatar')->store('avatars', 'public');
         $validated['avatar_path'] = $path;
     }
@@ -31,4 +30,4 @@ public function update(Request $request)
     $user->update($validated);
 
     return response()->json($user->fresh());
-}
+}}

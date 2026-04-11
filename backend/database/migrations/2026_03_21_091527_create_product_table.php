@@ -8,19 +8,35 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Schema::create('products', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->foreignId('category_id')->constrained()->cascadeOnDelete();
+        //     $table->string('name');
+        //     $table->string('slug')->unique();
+        //     $table->text('description')->nullable();
+        //     $table->decimal('price', 10, 2);
+        //     $table->string('image')->nullable();
+        //     $table->string('type')->default('floral'); 
+        //     $table->boolean('is_active')->default(true);
+        //     $table->unsignedInteger('stock')->default(0);
+        //     $table->timestamps();
+        // });
         Schema::create('products', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('category_id')->constrained()->cascadeOnDelete();
-            $table->string('name');
-            $table->string('slug')->unique();
-            $table->text('description')->nullable();
-            $table->decimal('price', 10, 2);
-            $table->string('image')->nullable();
-            $table->string('type')->default('floral'); 
-            $table->boolean('is_active')->default(true);
-            $table->unsignedInteger('stock')->default(0);
-            $table->timestamps();
-        });
+    $table->id();
+    $table->foreignId('category_id')->constrained()->cascadeOnDelete();
+    $table->string('name');
+    $table->string('slug')->unique();
+    $table->text('description')->nullable();
+    $table->decimal('price', 10, 2);
+    $table->decimal('discount_price', 10, 2)->nullable();
+    $table->string('image')->nullable();
+    $table->string('type')->default('floral');
+    $table->boolean('is_active')->default(true);
+    $table->boolean('is_popular')->default(false);
+    $table->unsignedInteger('stock')->default(0);
+    $table->unsignedInteger('views')->default(0);
+    $table->timestamps();
+});
     }
 
     public function down(): void

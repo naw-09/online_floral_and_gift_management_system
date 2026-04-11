@@ -19,9 +19,11 @@ class Product extends Model
         'slug',
         'description',
         'price',
+        'discount_price',
         'image',
         'type',
         'is_active',
+        'is_popular',
         'stock',
     ];
 
@@ -29,7 +31,9 @@ class Product extends Model
     {
         return [
             'price' => 'decimal:2',
+            'discount_price' => 'decimal:2',
             'is_active' => 'boolean',
+            'is_popular' => 'boolean', 
         ];
     }
 

@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './contexts/AuthContext'
+import { CartProvider } from './contexts/CartContext'
 import Layout from './components/Layout'
 import Home from './pages/Home'
 import Login from './pages/Login'
@@ -33,6 +34,7 @@ function AdminRoute({ children }) {
 
 export default function App() {
   return (
+    <CartProvider>
     <Routes>
       {/* Public / normal routes */}
       <Route path="/" element={<Layout />}>
@@ -74,5 +76,6 @@ export default function App() {
       {/* Catch-all fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </CartProvider>
   )
 }
