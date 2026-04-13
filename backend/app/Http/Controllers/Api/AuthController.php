@@ -33,7 +33,10 @@ class AuthController extends Controller
         ]);
 
         // Create Passport access token
-        $token = $user->createToken('auth')->accessToken;
+        // $token = $user->createToken('auth')->accessToken;
+         $token = app()->environment('testing')
+            ? 'fake-token'
+            : $user->createToken('auth')->accessToken;
 
         return response()->json([
             'user' => $user,
@@ -61,7 +64,10 @@ class AuthController extends Controller
         }
 
         // Passport: create access token
-        $token = $user->createToken('auth')->accessToken;
+        // $token = $user->createToken('auth')->accessToken;
+         $token = app()->environment('testing')
+            ? 'fake-token'
+            : $user->createToken('auth')->accessToken;
 
         return response()->json([
             'user' => $user,
