@@ -1,56 +1,3 @@
-// import { Link } from 'react-router-dom'
-
-// export default function Home() {
-//   return (
-//     <div>
-//       <section className="relative py-24 px-4 bg-gradient-to-br from-sage-50 via-floral-50 to-sage-100">
-//         <div className="max-w-4xl mx-auto text-center">
-//           <h1 className="font-display text-4xl md:text-5xl font-bold text-sage-900 mb-4">
-//             Fresh Flowers & Thoughtful Gifts
-//           </h1>
-//           <p className="text-lg text-sage-700 mb-8 max-w-2xl mx-auto">
-//             Browse our collections, add a personal message, and schedule delivery for any occasion.
-//           </p>
-//           <Link
-//             to="/products"
-//             className="inline-block bg-sage-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-sage-700 transition"
-//           >
-//             Shop Now
-//           </Link>
-//         </div>
-//       </section>
-//       <section className="py-16 px-4">
-//         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-8">
-//           <Link
-//             to="/products?type=floral"
-//             className="block rounded-2xl overflow-hidden border border-floral-200 bg-white shadow-sm hover:shadow-md transition"
-//           >
-//             <div className="h-48 bg-gradient-to-br from-floral-200 to-floral-300 flex items-center justify-center">
-//               <span className="text-5xl">🌸</span>
-//             </div>
-//             <div className="p-6">
-//               <h2 className="font-display text-xl font-semibold text-sage-900">Floral Arrangements</h2>
-//               <p className="text-sage-600 mt-1">Bouquets and arrangements for every occasion.</p>
-//             </div>
-//           </Link>
-//           <Link
-//             to="/products?type=gift"
-//             className="block rounded-2xl overflow-hidden border border-floral-200 bg-white shadow-sm hover:shadow-md transition"
-//           >
-//             <div className="h-48 bg-gradient-to-br from-sage-200 to-sage-300 flex items-center justify-center">
-//               <span className="text-5xl">🎁</span>
-//             </div>
-//             <div className="p-6">
-//               <h2 className="font-display text-xl font-semibold text-sage-900">Gift Items</h2>
-//               <p className="text-sage-600 mt-1">Curated gifts and baskets.</p>
-//             </div>
-//           </Link>
-//         </div>
-//       </section>
-//     </div>
-//   )
-// }
-
 
 
 
@@ -58,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import API from '../api/axios';
 import { useCart } from '../contexts/CartContext'; 
+import ProductCard from '../components/ProductCard';
 
 export default function Home() {
   const { addToCart } = useCart(); 
@@ -139,7 +87,7 @@ export default function Home() {
       </div>
 
       {/* Product Grids */}
-      <div className="max-w-6xl mx-auto px-4 py-16 space-y-10">
+      <div className="max-w-6xl mx-auto px-4 py-10 space-y-10">
         {loading ? (
             <div className="text-center text-sage-500">Loading products...</div>
         ) : (
@@ -283,80 +231,4 @@ export default function Home() {
   );
 }
 
-/**
- * UPDATED PRODUCT CARD WITH STOCK LOGIC
- */
-function ProductCard({ p, onAdd }) {
-  const isOutOfStock = p.stock <= 0;
 
-  const handlePlusClick = (e) => {
-    e.preventDefault(); 
-    e.stopPropagation(); 
-    if (!isOutOfStock) onAdd(p); 
-  };
-
-  return (
-    <Link to={`/products/${p.id}`} className={`group block bg-white rounded-2xl border border-sage-100 overflow-hidden hover:shadow-xl transition-all duration-300 relative ${isOutOfStock ? 'grayscale-[0.5]' : ''}`}>
-      <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
-        {isOutOfStock ? (
-            <span className="bg-slate-800 text-white text-[10px] font-bold px-2 py-1 rounded-full">SOLD OUT</span>
-        ) : (
-            <>
-                {p.discount_price > 0 && <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full">SALE</span>}
-                {p.is_popular && <span className="bg-amber-400 text-white text-[10px] font-bold px-2 py-1 rounded-full">POPULAR</span>}
-            </>
-        )}
-      </div>
-      
-      <div className="h-60 bg-sage-50 overflow-hidden relative">
-        {p.image ? (
-          <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-5xl opacity-20">
-            {p.type === 'floral' ? '🌸' : '🎁'}
-          </div>
-        )}
-        {/* Low Stock Badge */}
-        {!isOutOfStock && p.stock < 5 && (
-            <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm text-[9px] font-black text-orange-600 px-2 py-0.5 rounded-md border border-orange-100">
-                ONLY {p.stock} LEFT
-            </div>
-        )}
-      </div>
-
-      <div className="p-5">
-        <span className="text-[10px] font-bold text-sage-400 uppercase tracking-widest">{p.category?.name || 'Collection'}</span>
-        <h3 className="font-display font-bold text-sage-900 text-lg mt-1 truncate">{p.name}</h3>
-        
-        <div className="mt-4 flex items-center justify-between">
-          <div className="flex flex-col">
-            {p.discount_price > 0 ? (
-              <>
-                <span className="text-lg font-bold text-sage-900">${Number(p.discount_price).toFixed(2)}</span>
-                <span className="text-xs text-sage-400 line-through">${Number(p.price).toFixed(2)}</span>
-              </>
-            ) : (
-              <span className="text-lg font-bold text-sage-900">${Number(p.price).toFixed(2)}</span>
-            )}
-          </div>
-
-          <button
-            onClick={handlePlusClick}
-            disabled={isOutOfStock}
-            className={`${isOutOfStock ? 'bg-slate-200 cursor-not-allowed' : 'bg-sage-800 hover:bg-sage-600 shadow-md'} text-white w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90`}
-          >
-            {isOutOfStock ? (
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                </svg>
-            ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-5 h-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-            )}
-          </button>
-        </div>
-      </div>
-    </Link>
-  );
-}

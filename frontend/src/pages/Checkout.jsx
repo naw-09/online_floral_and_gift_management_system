@@ -12,7 +12,7 @@ export default function Checkout() {
   const [form, setForm] = useState({
     delivery_address: '',
     delivery_phone: '',
-    delivery_date: '', // Initial empty string
+    delivery_date: '',
     gift_message: '',
   })
 
@@ -54,7 +54,6 @@ export default function Checkout() {
     try {
       const payload = {
         ...form,
-        // Since we are now making it required, we don't need the || null check
       }
 
       await API.post('/orders', payload)

@@ -135,12 +135,20 @@ export default function ProductDetail() {
       .finally(() => setLoading(false))
   }, [id])
 
-  const handleAddToCart = () => {
-    if (!product || product.stock <= 0) return;
+ const handleAddToCart = () => {
+  const isLoggedIn = !!localStorage.getItem("token");
 
-    addToCart(product, quantity);
-    navigate('/cart');
+  if (!isLoggedIn) {
+    alert("Please login first");
+    navigate("/login");
+    return;
   }
+
+  if (!product || product.stock <= 0) return;
+
+  addToCart(product, quantity);
+  navigate('/cart');
+};
 
   if (loading) return <div className="max-w-4xl mx-auto px-4 py-20 text-center text-sage-500 font-medium">Loading product details...</div>
   if (!product) return <div className="max-w-4xl mx-auto px-4 py-20 text-center text-red-500">Product not found.</div>

@@ -1,82 +1,66 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import API from '../api/axios'; 
-
-const AuthContext = createContext();
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import API from '../api/axios'
+import { clearUser, setAuthLoading, setUser } from '../store/slices/authSlice'
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch()
+  const loading = useSelector((state) => state.auth.loading)
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
+    const savedUser = localStorage.getItem('user')
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      dispatch(setUser(JSON.parse(savedUser)))
     }
-    setLoading(false);
-  }, []);
+    dispatch(setAuthLoading(false))
+  }, [dispatch])
 
-  // 1. Register Function
+  return !loading ? children : null
+}
+
+export const useAuth = () => {
+  const dispatch = useDispatch()
+  const user = useSelector((state) => state.auth.user)
+
   const register = async (form) => {
-    try {
-      const response = await API.post('/register', form);
+    const response = await API.post('/register', form)
+    const { user: registeredUser, token } = response.data
 
-      const { user, token } = response.data;
+    localStorage.setItem('token', token)
+    localStorage.setItem('user', JSON.stringify(registeredUser))
+    dispatch(setUser(registeredUser))
 
-      // Save user and token
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
+    return { user: registeredUser }
+  }
 
-      setUser(user);
-
-      return { user };
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  // 2. Login Function
   const login = async (email, password) => {
-    try {
-      const response = await API.post('/login', { email, password });
-      const { user, token } = response.data;
+    const response = await API.post('/login', { email, password })
+    const { user: loggedInUser, token } = response.data
 
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('token', token)
+    localStorage.setItem('user', JSON.stringify(loggedInUser))
+    dispatch(setUser(loggedInUser))
 
-      setUser(user);
-      return { user };
-    } catch (error) {
-      throw error;
-    }
-  };
+    return { user: loggedInUser }
+  }
 
-  // 3. Logout Function
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
-  };
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    dispatch(clearUser())
+  }
 
   const updateUser = (updatedUser) => {
-    setUser(updatedUser);
-    
-    localStorage.setItem('user', JSON.stringify(updatedUser));
-  };
+    dispatch(setUser(updatedUser))
+    localStorage.setItem('user', JSON.stringify(updatedUser))
+  }
 
-  const value = {
+  return {
     user,
-    register, 
+    register,
     login,
     logout,
     updateUser,
-    isAdmin: user?.role === 'admin'
-  };
-
-  return (
-    <AuthContext.Provider value={value}>
-      {!loading && children}
-    </AuthContext.Provider>
-  );
+    isAdmin: user?.role === 'admin',
+  }
 }
-
-export const useAuth = () => useContext(AuthContext);
