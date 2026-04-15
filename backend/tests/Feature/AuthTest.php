@@ -108,7 +108,7 @@ class AuthTest extends TestCase
 
         $response->assertStatus(200)
                  ->assertJson([
-                     'message' => 'Logged out'
+                     'message' => 'Logged out Successfully!'
                  ]);
     }
 }

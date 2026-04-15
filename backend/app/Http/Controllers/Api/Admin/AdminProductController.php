@@ -55,7 +55,6 @@ class AdminProductController extends Controller
         $validated['is_active'] = filter_var($request->is_active ?? true, FILTER_VALIDATE_BOOLEAN);
         $validated['is_popular'] = filter_var($request->is_popular ?? false, FILTER_VALIDATE_BOOLEAN);
 
-        // stock default
         $validated['stock'] = $request->stock ?? 0;
 
         // image upload

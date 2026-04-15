@@ -24,7 +24,7 @@ export default function Home() {
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      API.get('/products?limit=50'),
+      API.get('/products'),
       API.get('/categories'),
     ])
       .then(([productsRes, categoriesRes]) => {

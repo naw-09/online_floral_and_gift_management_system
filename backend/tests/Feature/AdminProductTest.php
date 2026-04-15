@@ -19,19 +19,15 @@ class AdminProductTest extends TestCase
     {
         parent::setUp();
 
-        // 🔥 CREATE ADMIN USER (THIS FIXES 403)
         $user = User::create([
             'name' => 'Admin Test',
             'email' => 'admin@test.com',
             'password' => bcrypt('password'),
 
-            // 👉 IMPORTANT: MUST MATCH YOUR admin middleware
             'role' => 'admin', 
-            // OR if your system uses:
             // 'is_admin' => true,
         ]);
 
-        // 🔥 AUTH WITH PASSPORT
         Passport::actingAs($user);
     }
 
