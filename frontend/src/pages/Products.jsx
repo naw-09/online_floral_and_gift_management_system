@@ -1,18 +1,20 @@
-
-
 import { useState, useEffect } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import API from '../api/axios'
-import { useCart } from '../contexts/CartContext' 
+import { useCart } from '../contexts/CartContext'
 import ProductCard from '../components/ProductCard'
 
 export default function Products() {
-  const { addToCart } = useCart() 
+  const { addToCart } = useCart()
   const [searchParams] = useSearchParams()
 
-  const [products, setProducts] = useState({ data: [], meta: {} })
+  const [products, setProducts] = useState({ data: [], total: 0 })
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
+
+  const [page, setPage] = useState(1)
+  const [lastPage, setLastPage] = useState(1)
+  const [loadingMore, setLoadingMore] = useState(false)
 
   const [filters, setFilters] = useState({
     search: searchParams.get('search') || '',
@@ -20,20 +22,11 @@ export default function Products() {
     type: searchParams.get('type') || '',
     min_price: searchParams.get('min_price') || '',
     max_price: searchParams.get('max_price') || '',
+    is_popular: searchParams.get('is_popular') || '',
+    has_discount: searchParams.get('has_discount') || '',
     sort_by: 'created_at',
     sort_order: 'desc',
   })
-
-  useEffect(() => {
-    const categoryFromUrl = searchParams.get('category_id') || ''
-    setFilters((prev) => {
-      if (prev.category_id === categoryFromUrl) return prev
-      return {
-        ...prev,
-        category_id: categoryFromUrl,
-      }
-    })
-  }, [searchParams])
 
   useEffect(() => {
     API.get('/categories')
@@ -41,51 +34,100 @@ export default function Products() {
       .catch(() => setCategories([]))
   }, [])
 
+
   useEffect(() => {
-    setLoading(true)
+    setPage(1)
+  }, [filters])
+
+  useEffect(() => {
+    const isFirstPage = page === 1
+
+    if (isFirstPage) setLoading(true)
+    else setLoadingMore(true)
+
     const params = new URLSearchParams()
-    Object.entries(filters).forEach(([k, v]) => {
-      if (v !== '' && v !== null && v !== undefined) {
-        params.set(k, v)
+
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== '' && value !== null && value !== undefined) {
+        params.set(key, value)
       }
     })
 
+    params.set('page', page)
+
     API.get(`/products?${params}`)
-      .then(({ data }) => setProducts(data))
-      .catch(() => setProducts({ data: [], meta: {} }))
-      .finally(() => setLoading(false))
-  }, [filters])
+      .then(({ data }) => {
+        setLastPage(data.last_page)
+
+        setProducts(prev =>
+          page === 1
+            ? data
+            : {
+                ...data,
+                data: [...prev.data, ...data.data],
+              }
+        )
+      })
+      .catch(() => {
+        setProducts({ data: [], total: 0 })
+      })
+      .finally(() => {
+        setLoading(false)
+        setLoadingMore(false)
+      })
+  }, [filters, page])
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + window.scrollY >=
+        document.body.offsetHeight - 200
+      ) {
+        if (!loadingMore && page < lastPage) {
+          setPage(prev => prev + 1)
+        }
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [page, lastPage, loadingMore])
 
   const handleFilter = (key, value) => {
-    setFilters((f) => ({ ...f, [key]: value }))
+    setFilters((prev) => ({ ...prev, [key]: value }))
   }
 
   const handleQuickAdd = (product) => {
-    if (product.stock <= 0) return;
-    addToCart(product, 1); 
-    alert(`${product.name} added to cart!`);
-  };
+    if (product.stock <= 0) return
+    addToCart(product, 1)
+    alert(`${product.name} added to cart!`)
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
-      <h1 className="font-display text-3xl font-bold text-sage-900 mb-8 text-center md:text-left">
+
+      <h1 className="font-display text-3xl font-bold text-sage-900 mb-8">
         Explore Our Collection
       </h1>
 
       <div className="flex flex-col md:flex-row gap-10">
-        {/* FILTER SIDEBAR (Kept exactly the same) */}
+
+        {/* FILTER SIDEBAR (UNCHANGED UI) */}
         <aside className="md:w-64 shrink-0 space-y-6">
           <div className="bg-sage-50 p-6 rounded-2xl border border-sage-100 sticky top-24">
-            <h2 className="text-sm font-bold text-sage-800 uppercase tracking-widest mb-4">Filters</h2>
+
+            <h2 className="text-sm font-bold text-sage-800 uppercase mb-4">
+              Filters
+            </h2>
+
             <div className="space-y-4">
+
               <div>
                 <label className="text-xs font-semibold text-sage-500 uppercase">Search</label>
                 <input
-                  type="text"
-                  placeholder="Roses, Lilies..."
                   value={filters.search}
                   onChange={(e) => handleFilter('search', e.target.value)}
-                  className="w-full mt-1 px-3 py-2 border border-sage-200 rounded-xl text-sm focus:ring-2 focus:ring-sage-500 outline-none"
+                  className="w-full mt-1 px-3 py-2 border rounded-xl text-sm"
                 />
               </div>
 
@@ -94,7 +136,7 @@ export default function Products() {
                 <select
                   value={filters.category_id}
                   onChange={(e) => handleFilter('category_id', e.target.value)}
-                  className="w-full mt-1 px-3 py-2 border border-sage-200 rounded-xl text-sm outline-none"
+                  className="w-full mt-1 px-3 py-2 border rounded-xl text-sm"
                 >
                   <option value="">All categories</option>
                   {categories.map((c) => (
@@ -108,7 +150,7 @@ export default function Products() {
                 <select
                   value={filters.type}
                   onChange={(e) => handleFilter('type', e.target.value)}
-                  className="w-full mt-1 px-3 py-2 border border-sage-200 rounded-xl text-sm outline-none"
+                  className="w-full mt-1 px-3 py-2 border rounded-xl text-sm"
                 >
                   <option value="">All types</option>
                   <option value="floral">Floral</option>
@@ -124,14 +166,14 @@ export default function Products() {
                     placeholder="Min"
                     value={filters.min_price}
                     onChange={(e) => handleFilter('min_price', e.target.value)}
-                    className="w-full px-3 py-2 border border-sage-200 rounded-xl text-sm outline-none"
+                    className="w-full px-3 py-2 border rounded-xl text-sm"
                   />
                   <input
                     type="number"
                     placeholder="Max"
                     value={filters.max_price}
                     onChange={(e) => handleFilter('max_price', e.target.value)}
-                    className="w-full px-3 py-2 border border-sage-200 rounded-xl text-sm outline-none"
+                    className="w-full px-3 py-2 border rounded-xl text-sm"
                   />
                 </div>
               </div>
@@ -144,41 +186,54 @@ export default function Products() {
                     const [sort_by, sort_order] = e.target.value.split('-')
                     setFilters((f) => ({ ...f, sort_by, sort_order }))
                   }}
-                  className="w-full mt-1 px-3 py-2 border border-sage-200 rounded-xl text-sm outline-none"
+                  className="w-full mt-1 px-3 py-2 border rounded-xl text-sm"
                 >
                   <option value="created_at-desc">Newest First</option>
-                  <option value="price-asc">Price: Low to High</option>
-                  <option value="price-desc">Price: High to Low</option>
+                  <option value="price-asc">Low to High</option>
+                  <option value="price-desc">High to Low</option>
                 </select>
               </div>
+
             </div>
           </div>
         </aside>
 
-        {/* PRODUCTS GRID */}
+        {/* PRODUCTS */}
         <div className="flex-1">
-          {loading ? (
+
+       
+          <div className="mb-4 text-sm text-sage-600">
+            Total Products: <b>{products.total}</b>
+          </div>
+
+          {loading && page === 1 ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-               {[...Array(6)].map((_, i) => (
-                  <div key={i} className="h-80 bg-sage-50 rounded-2xl animate-pulse"></div>
-               ))}
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="h-80 bg-sage-50 rounded-2xl animate-pulse" />
+              ))}
             </div>
           ) : products.data?.length === 0 ? (
             <div className="text-center py-20 bg-sage-50 rounded-3xl">
-               <p className="text-sage-500 font-medium">No products found matching your criteria.</p>
+              No products found
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {products.data?.map((p) => (
-                <ProductCard 
-                  key={p.id} 
-                  p={p} 
-                  onAdd={handleQuickAdd} 
-                />
-              ))}
-            </div>
+            <>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {products.data.map((p) => (
+                  <ProductCard key={p.id} p={p} onAdd={handleQuickAdd} />
+                ))}
+              </div>
+
+              {loadingMore && (
+                <div className="text-center py-6 text-sage-500 text-sm">
+                  Loading more products...
+                </div>
+              )}
+            </>
           )}
+
         </div>
+
       </div>
     </div>
   )

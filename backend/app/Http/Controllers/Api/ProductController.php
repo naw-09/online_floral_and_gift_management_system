@@ -8,25 +8,21 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of active products with images.
-     */
     public function index(Request $request)
     {
-        
         $query = Product::with('category')->where('is_active', true);
 
-        // Filter by Category
+        // Category filter
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
         }
 
-        // Filter by Type (floral/gift)
+        // Type filter
         if ($request->filled('type')) {
             $query->where('type', $request->type);
         }
 
-        // Search by Name or Description
+        // Search
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
@@ -34,12 +30,26 @@ class ProductController extends Controller
             });
         }
 
-        // Price Range Filtering
+        // Price filters
         if ($request->filled('min_price')) {
             $query->where('price', '>=', $request->min_price);
         }
+
         if ($request->filled('max_price')) {
             $query->where('price', '<=', $request->max_price);
+        }
+
+        // POPULAR FILTER 
+        if ($request->filled('is_popular') && $request->is_popular == '1') {
+            $query->where('is_popular', 1);
+        }
+
+        //  DISCOUNT FILTER 
+        if ($request->filled('has_discount') && $request->has_discount == '1') {
+            $query->where(function ($q) {
+                $q->whereNotNull('discount_price')
+                  ->where('discount_price', '>', 0);
+            });
         }
 
         // Sorting
@@ -53,12 +63,8 @@ class ProductController extends Controller
         return response()->json($products);
     }
 
-    /**
-     * Display the specified product.
-     */
     public function show(Product $product)
     {
-        // Security: Don't show inactive products to public users
         if (!$product->is_active) {
             return response()->json(['message' => 'Product is currently unavailable'], 404);
         }
@@ -68,29 +74,25 @@ class ProductController extends Controller
         return response()->json($product);
     }
 
-    /**
- * Get popular products
- */
-public function popular()
-{
-    return Product::with('category')
-        ->where('is_active', true)
-        ->where('is_popular', true)
-        ->latest()
-        ->take(6)
-        ->get();
-}
+    // Popular products API
+    public function popular()
+    {
+        return Product::with('category')
+            ->where('is_active', true)
+            ->where('is_popular', true)
+            ->latest()
+            ->take(6)
+            ->get();
+    }
 
-/**
- * Get discounted products
- */
-public function discounted()
-{
-    return Product::with('category')
-        ->where('is_active', true)
-        ->where('discount_price', '>', 0) 
-        ->latest()
-        ->take(6)
-        ->get();
-}
+    // Discount products API
+    public function discounted()
+    {
+        return Product::with('category')
+            ->where('is_active', true)
+            ->where('discount_price', '>', 0)
+            ->latest()
+            ->take(6)
+            ->get();
+    }
 }
